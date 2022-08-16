@@ -13,7 +13,7 @@
 </header>
 
 <div class="page-section">
-    <form method="post" action="{{route('products.store')}}" enctype="multipart/form-data">
+    <form id="product-app" method="post" action="{{route('products.store')}}" enctype="multipart/form-data">
         @csrf
         {{ csrf_field() }}
         <div class="card">
@@ -114,7 +114,7 @@
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label>Loại sản phẩm</label>
-                            <select name="product_type" class="form-control" id="product_type">
+                            <select name="product_type" class="form-control" id="product_type" v-model="product_type">
                                 <option value="Regular" @selected(old('product_type')=='Regular' )>Sản phẩm thường</option>
                                 <option value="Block" @selected(old('product_type')=='Block' )>Sản phẩm block</option>
                                 <option value="Consignment" @selected(old('product_type')=='Consignment' )>Sản phẩm ký gửi</option>
@@ -139,7 +139,7 @@
                         <div class="form-group">
                             <label class="switcher-control">
                                 <input type="hidden" name="product_open" value="0">
-                                <input type="checkbox" class="switcher-input product_open" name="product_open" value="1" @checked( old('product_open')==1 )>
+                                <input type="checkbox" class="switcher-input product_open" name="product_open" value="1" @checked( old('product_open')==1 ) v-model="product_open">
                                 <span class="switcher-indicator"></span>
                             </label>
                             @if ($errors->any())
@@ -147,8 +147,8 @@
                             @endif
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="form-group showIfProductOpen" style="display:none">
+                    <div class="col-lg-4" v-show="product_open">
+                        <div class="form-group">
                             <label for="tf1">Ngày mở bán</label> <input name="product_open_date" type="date" class="form-control" placeholder="" value="{{ old('product_open_date') }}">
                             @if ($errors->any())
                             <p style="color:red">{{ $errors->first('product_open_date') }}</p>
@@ -157,16 +157,18 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body border-top showIfProductConsignment" style="display:none">
+            <div class="card-body border-top" v-show="product_type == 'Consignment'">
                 <legend>Thông tin ký gửi</legend>
                 <div class="row">
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label>Nhân viên phụ trách</label>
-                            <select name="user_contact_id" class="form-control">
+                            <select name="user_contact_id" class="form-control" data-toggle="select2">
                                 <option value="">Vui lòng chọn</option>
                                 @foreach($users as $user)
-                                <option value="{{ $user->id }}" @selected(old('user_contact_id')==$user->id)>{{$user->name}}</option>
+                                <option value="{{ $user->id }}" @selected(old('user_contact_id')==$user->id)>
+                                    {{$user->name}} - {{$user->phone}}
+                                </option>
                                 @endforeach
                             </select>
                             @if ($errors->any())
@@ -194,11 +196,56 @@
 
                 </div>
             </div>
-            <div class="card-body border-top">
+            <div class="card-body border-top" v-show="product_type == 'Block'">
+                <legend>Thông tin các lô</legend>
+                <div class="row" v-for="(block, index) in blocks">
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label v-if="index === 0">Mã lô</label>
+                            <input name="block[id][]" v-bind:value="block.id ?? index + 1" type="text" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="form-group">
+                            <label v-if="index === 0">Diện tích </label>
+                            <input name="block[area][]" v-model="blocks[index].area" type="text" class="form-control" placeholder="5x20">
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="form-group">
+                            <label v-if="index === 0">Giá</label>
+                            <input name="block[price][]" v-model="blocks[index].price" type="text" class="form-control" data-mask="currency">
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        <div class="form-group">
+                            <label v-if="index === 0">Đơn vị</label>
+                            <select name="block[unit][]" class="form-control" v-model="blocks[index].unit">
+                                <option v-bind:selected="blocks[index].unit == 'VND'" value="VND">VND</option>
+                                <option v-bind:selected="blocks[index].unit == 'm2'" value="m2">Giá / m²</option>
+                                <option v-bind:selected="blocks[index].unit == 'agree'" value="agree">Thoả thuận</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-1">
+                        <div class="form-group" v-if="index !== 0">
+                            <label v-if="index === 0">Hành động </label>
+                            <button type="button" class="btn btn-secondary" @click="deleteBlock(block.id)">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <button type="button" class="btn btn-primary" @click="addNewBlock()"> Thêm lô </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body border-top" v-show="product_type != 'Regular'">
                 <legend>Thông tin giá tiền</legend>
                 <div class="row">
-                    <div class="col-lg-4">
-                        <div class="form-group showIfProductConsignment" style="display:none">
+                    <div class="col-lg-4" v-show="product_type == 'Consignment'">
+                        <div class="form-group">
                             <label>Giá ký gửi <abbr title="Trường bắt buộc">*</abbr></label>
                             <input name="price_deposit" type="text" class="form-control" placeholder="Nhập giá ký gửi, VD 12000000" value="{{ old('price_deposit') }}" data-mask="currency">
                             @if ($errors->any())
@@ -206,8 +253,8 @@
                             @endif
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="form-group showIfProductConsignment" style="display:none">
+                    <div class="col-lg-4" v-show="product_type == 'Consignment'">
+                        <div class="form-group">
                             <label>Giá chênh <abbr title="Trường bắt buộc">*</abbr></label>
                             <input name="price_diff" type="text" class="form-control" placeholder="Nhập giá chênh, VD 12000000" value="{{ old('price_diff') }}" data-mask="currency">
                             @if ($errors->any())
@@ -215,8 +262,8 @@
                             @endif
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="form-group showpriceCommission" style="display:none">
+                    <div class="col-lg-4" v-show="product_type == 'Block'">
+                        <div class="form-group">
                             <label>Mức hoa hồng <abbr title="Trường bắt buộc">*</abbr></label>
                             <input name="price_commission" type="text" class="form-control" placeholder="Nhập mức hoa hồng, VD 12000000" value="{{ old('price_commission') }}" data-mask="currency">
                             @if ($errors->any())
@@ -410,6 +457,7 @@
     jQuery(document).ready(function() {
         jQuery('.province_id').on('change', function() {
             var province_id = jQuery(this).val();
+            if (!province_id) return false;
 
             $.ajax({
                 url: "/api/get_districts/" + province_id,
@@ -427,6 +475,8 @@
 
         jQuery('.district_id').on('change', function() {
             var district_id = jQuery(this).val();
+            if (!district_id) return false;
+
             $.ajax({
                 url: "/api/get_wards/" + district_id,
                 type: "GET",
@@ -439,8 +489,10 @@
                 }
             });
         });
+
         jQuery('.branch_id').on('change', function() {
             var branch_id = jQuery(this).val();
+            if (!branch_id) return false;
             $.ajax({
                 url: "/api/get_users_by_branch_id/" + branch_id,
                 type: "GET",
@@ -453,47 +505,46 @@
                 }
             });
         });
+    });
 
-        //logic san pham
-        jQuery('.product_open').on('click', function() {
-            if ($(this).is(':checked')) {
-                $('.showIfProductOpen').show();
-            } else {
-                $('.showIfProductOpen').hide();
+    //logic sản phẩm
+    var app_odds = new Vue({
+        el: '#product-app',
+        data: {
+            blocks: [],
+            product_type: '<?= old('product_type') ?? 'Regular'; ?>',
+            product_open: <?= old('product_open') ?? 0; ?>,
+        },
+        methods: {
+            addNewBlock() {
+                const block = {
+                    'id': this.blocks.length + 1,
+                    'area': '',
+                    'price': '',
+                    'unit': '',
+                };
+                this.blocks.push(block);
+            },
+            deleteBlock(id) {
+                this.blocks = this.blocks.filter(function(el) {
+                    return el.id != id;
+                });
             }
-        });
+        },
+        // data() {
+        //     return {
+        //         blocks: this.blocks.addNewBlock()
+        //     }
+        // },
+        updated() {
 
-        jQuery('#product_type').on('change', function() {
-            var product_type = jQuery(this).val();
-            //showIfProductConsignment
-            console.log(product_type);
-            if (product_type == 'Consignment') {
-                $('.showIfProductConsignment').show();
-            } else {
-                $('.showIfProductConsignment').hide();
-            }
-        });
-        jQuery('#product_type').on('change', function() {
-            var product_type = jQuery(this).val();
-            //showIfProductpricecommission
-            console.log(product_type);
-            if (product_type == 'Regular') {
-                $('.showpriceCommission').show();
-            } else {
-                $('.showpriceCommission').hide();
-            }
-        });
+        },
+        created() {
 
-        jQuery('#product_type').on('change', function() {
-            var product_type = jQuery(this).val();
-            //showIBlock
-            console.log(product_type);
-            if (product_type == 'Block') {
-                $('.showpriceCommission').show();
-            } else {
-                $('.showpriceCommission').hide();
-            }
-        });
+        },
+        mounted() {
+
+        }
     });
 </script>
 @endsection
