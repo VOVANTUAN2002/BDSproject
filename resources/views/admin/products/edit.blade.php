@@ -223,25 +223,25 @@
                 <legend>Thông tin các lô</legend>
                 <div class="row" v-for="(block, index) in blocks">
                     <div class="col-lg-2">
-                        <div class="form-group" >
+                        <div class="form-group">
                             <label v-if="index === 0">Mã lô</label>
-                            <input name="block[id][]" v-bind:value="block.id ?? index + 1" type="text" class="form-control" >
+                            <input name="block[id][]" v-bind:value="block.id ?? index + 1" type="text" class="form-control">
                         </div>
                     </div>
                     <div class="col-lg-3">
-                        <div class="form-group" >
+                        <div class="form-group">
                             <label v-if="index === 0">Diện tích </label>
                             <input name="block[area][]" v-model="blocks[index].area" type="text" class="form-control" placeholder="5x20">
                         </div>
                     </div>
                     <div class="col-lg-4">
-                        <div class="form-group" >
+                        <div class="form-group">
                             <label v-if="index === 0">Giá</label>
                             <input name="block[price][]" v-model="blocks[index].price" type="text" class="form-control" data-mask="currency">
                         </div>
                     </div>
                     <div class="col-lg-2">
-                        <div class="form-group" >
+                        <div class="form-group">
                             <label v-if="index === 0">Đơn vị</label>
                             <select name="block[unit][]" class="form-control" v-model="blocks[index].unit">
                                 <option v-bind:selected="blocks[index].unit == 'VND'" value="VND">VND</option>
@@ -258,15 +258,15 @@
                     </div>
                 </div>
                 <div class="row">
-                   <div class="col-lg-12">
-                       <button type="button" class="btn btn-primary" @click="addNewBlock()"> Thêm lô </button>
-                   </div>     
+                    <div class="col-lg-12">
+                        <button type="button" class="btn btn-primary" @click="addNewBlock()"> Thêm lô </button>
+                    </div>
                 </div>
             </div>
             <div class="card-body border-top" v-show="product_type != 'Regular'">
                 <legend>Thông tin giá tiền</legend>
                 <div class="row">
-                <div class="col-lg-4" v-show="product_type == 'Consignment'">
+                    <div class="col-lg-4" v-show="product_type == 'Consignment'">
                         <div class="form-group ">
                             <label>Giá ký gửi <abbr title="Trường bắt buộc">*</abbr></label>
                             <input name="price_deposit" type="text" class="form-control" placeholder="Nhập giá ký gửi, VD 12000000" value="{{ $product->price_deposit }}" data-mask="currency">
@@ -276,7 +276,7 @@
                         </div>
                     </div>
                     <div class="col-lg-4" v-show="product_type == 'Consignment'">
-                        <div class="form-group" >
+                        <div class="form-group">
                             <label>Giá chênh <abbr title="Trường bắt buộc">*</abbr></label>
                             <input name="price_diff" type="text" class="form-control" placeholder="Nhập giá chênh, VD 12000000" value="{{ $product->price_diff }}" data-mask="currency">
                             @if ($errors->any())
@@ -518,7 +518,7 @@
 
         jQuery('.province_id').on('change', function() {
             var province_id = jQuery(this).val();
-            if( !province_id ) return false;
+            if (!province_id) return false;
             $.ajax({
                 url: "/api/get_districts/" + province_id,
                 type: "GET",
@@ -535,7 +535,7 @@
 
         jQuery('.district_id').on('change', function() {
             var district_id = jQuery(this).val();
-            if( !district_id ) return false;
+            if (!district_id) return false;
 
             $.ajax({
                 url: "/api/get_wards/" + district_id,
@@ -552,7 +552,7 @@
         });
         jQuery('.branch_id').on('change', function() {
             var branch_id = jQuery(this).val();
-            if( !branch_id ) return false;
+            if (!branch_id) return false;
 
             if (branch_id) {
                 $.ajax({
@@ -576,14 +576,14 @@
         //xóa ảnh phần sản phẩm chỉnh sửa
         $(".btn-delete").click(function() {
             var confirm_delete = confirm("Xác nhận xóa hình ?");
-            if( confirm_delete === true ){
+            if (confirm_delete === true) {
                 var product_image_id = $(this).attr('data-id');
                 $.ajax({
                     type: 'DELETE',
                     url: '/api/product_images/' + product_image_id,
                     dataType: 'json',
                     success: function(data) {
-                        $(".product_image_"+ product_image_id).remove();
+                        $(".product_image_" + product_image_id).remove();
                     }
                 });
             }
@@ -593,39 +593,41 @@
 
     //logic sản phẩm
     var blocks = '<?= $product->product_blocks; ?>';
-    if(!blocks){
+    if (!blocks) {
         blocks = '[]';
     }
     var app_odds = new Vue({
         el: '#product-app',
         data: {
-            blocks : JSON.parse(blocks),
-            product_type : '<?= $product->product_type ?? 'Regular'; ?>',
-            product_open : <?= $product->product_open ?? 0; ?>,
+            blocks: JSON.parse(blocks),
+            product_type: '<?= $product->product_type ?? 'Regular'; ?>',
+            product_open: <?= $product->product_open ?? 0; ?>,
         },
         methods: {
             addNewBlock() {
                 const block = {
-                    'id' : this.blocks.length + 1,
-                    'area' : '',
-                    'price' : '',
-                    'unit' : '',
+                    'id': this.blocks.length + 1,
+                    'area': '',
+                    'price': '',
+                    'unit': '',
                 };
                 this.blocks.push(block);
             },
-            deleteBlock( id ){
-                this.blocks = this.blocks.filter(function(el) { return el.id != id; }); 
+            deleteBlock(id) {
+                this.blocks = this.blocks.filter(function(el) {
+                    return el.id != id;
+                });
             }
         },
-		updated() {
+        updated() {
 
         },
-		created() {
+        created() {
 
-		},
-        mounted () {
-		  
+        },
+        mounted() {
+
         }
-      });
+    });
 </script>
 @endsection
