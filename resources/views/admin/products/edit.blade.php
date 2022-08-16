@@ -590,6 +590,8 @@
         });
 
     });
+
+    //logic sản phẩm
     var blocks = '<?= $product->product_blocks; ?>';
     if(!blocks){
         blocks = '[]';

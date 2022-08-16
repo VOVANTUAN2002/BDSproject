@@ -507,6 +507,7 @@
         });
     });
 
+    //logic sản phẩm
     var app_odds = new Vue({
         el: '#product-app',
         data: {
