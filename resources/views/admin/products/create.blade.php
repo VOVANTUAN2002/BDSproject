@@ -13,7 +13,7 @@
 </header>
 
 <div class="page-section">
-    <form method="post" action="{{route('products.store')}}" enctype="multipart/form-data">
+    <form method="post" id="insurance-app" action="{{route('products.store')}}" enctype="multipart/form-data">
         @csrf
         {{ csrf_field() }}
         <div class="card">
@@ -114,7 +114,7 @@
                     <div class="col-lg-4">
                         <div class="form-group">
                             <label>Loại sản phẩm</label>
-                            <select name="product_type" class="form-control" id="product_type">
+                            <select name="product_type" class="form-control" id="product_type" v-model="product_type">
                                 <option value="Regular" @selected(old('product_type')=='Regular' )>Sản phẩm thường</option>
                                 <option value="Block" @selected(old('product_type')=='Block' )>Sản phẩm block</option>
                                 <option value="Consignment" @selected(old('product_type')=='Consignment' )>Sản phẩm ký gửi</option>
@@ -129,17 +129,17 @@
                         <div class="form-group">
                             <label class="switcher-control">
                                 <input type="hidden" name="product_hot" value="0">
-                                <input type="checkbox" class="switcher-input" name="product_hot" @checked(old('product_hot')==1) value="1">
+                                <input type="checkbox" class="switcher-input" name="product_hot" @checked(old('product_hot')==1) value="1" >
                                 <span class="switcher-indicator"></span>
                             </label>
                         </div>
                     </div>
-                    <div class="col-lg-2">
+                    <div class="col-lg-2" v-show="product_open">
                         <label>Sắp mở bán</label>
                         <div class="form-group">
                             <label class="switcher-control">
                                 <input type="hidden" name="product_open" value="0">
-                                <input type="checkbox" class="switcher-input product_open" name="product_open" value="1" @checked( old('product_open')==1 )>
+                                <input type="checkbox" class="switcher-input product_open" name="product_open" value="1" @checked( old('product_open')==1 ) v-model="product_open">
                                 <span class="switcher-indicator"></span>
                             </label>
                             @if ($errors->any())
@@ -157,7 +157,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body border-top showIfProductConsignment" style="display:none">
+            <div class="card-body border-top showIfProductConsignment" style="display:none"  v-show="product_type != 'Consignment'">
                 <legend>Thông tin ký gửi</legend>
                 <div class="row">
                     <div class="col-lg-4">
@@ -463,16 +463,26 @@
             }
         });
 
-        jQuery('#product_type').on('change', function() {
-            var product_type = jQuery(this).val();
-            //showIfProductConsignment
-            console.log(product_type);
-            if (product_type == 'Consignment') {
-                $('.showIfProductConsignment').show();
-            } else {
-                $('.showIfProductConsignment').hide();
+        var app_odds = new Vue({
+            el: '#insurance-app',
+            data: {
+                Amount_unpaids: [],
+                product_type: '<?= old('product_type') ?? 'Consignment'; ?>',
+                product_open: <?= old('product_open') ?? 0; ?>,
             }
         });
+
+        // jQuery('#product_type').on('change', function() {
+        //     var product_type = jQuery(this).val();
+        //     //showIfProductConsignment
+        //     console.log(product_type);
+        //     if (product_type == 'Consignment') {
+        //         $('.showIfProductConsignment').show();
+        //     } else {
+        //         $('.showIfProductConsignment').hide();
+        //     }
+        // });
+
         jQuery('#product_type').on('change', function() {
             var product_type = jQuery(this).val();
             //showIfProductpricecommission
