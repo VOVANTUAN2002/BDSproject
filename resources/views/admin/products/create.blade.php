@@ -531,6 +531,11 @@
                 });
             }
         },
+        // data() {
+        //     return {
+        //         blocks: this.blocks.addNewBlock()
+        //     }
+        // },
         updated() {
 
         },
