@@ -157,7 +157,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body border-top showIfProductConsignment" style="display:none"  v-show="product_type != 'Consignment'">
+            <div class="card-body border-top showIfProductConsignment" style="display:none">
                 <legend>Thông tin ký gửi</legend>
                 <div class="row">
                     <div class="col-lg-4">
@@ -194,11 +194,11 @@
 
                 </div>
             </div>
-            <div class="card-body border-top">
+            <div class="card-body border-top" v-show="product_type != 'Consignment'">
                 <legend>Thông tin giá tiền</legend>
                 <div class="row">
                     <div class="col-lg-4">
-                        <div class="form-group showIfProductConsignment" style="display:none">
+                        <div class="form-group showIfProductConsignment" style="display:none" v-show="product_type == 'Consignment'">
                             <label>Giá ký gửi <abbr title="Trường bắt buộc">*</abbr></label>
                             <input name="price_deposit" type="text" class="form-control" placeholder="Nhập giá ký gửi, VD 12000000" value="{{ old('price_deposit') }}" data-mask="currency">
                             @if ($errors->any())
@@ -207,7 +207,7 @@
                         </div>
                     </div>
                     <div class="col-lg-4">
-                        <div class="form-group showIfProductConsignment" style="display:none">
+                        <div class="form-group showIfProductConsignment" style="display:none" v-show="product_type == 'Block'">
                             <label>Giá chênh <abbr title="Trường bắt buộc">*</abbr></label>
                             <input name="price_diff" type="text" class="form-control" placeholder="Nhập giá chênh, VD 12000000" value="{{ old('price_diff') }}" data-mask="currency">
                             @if ($errors->any())
@@ -216,7 +216,7 @@
                         </div>
                     </div>
                     <div class="col-lg-4">
-                        <div class="form-group showpriceCommission" style="display:none">
+                        <div class="form-group showpriceCommission" style="display:none" v-show="product_type == 'Regular'">
                             <label>Mức hoa hồng <abbr title="Trường bắt buộc">*</abbr></label>
                             <input name="price_commission" type="text" class="form-control" placeholder="Nhập mức hoa hồng, VD 12000000" value="{{ old('price_commission') }}" data-mask="currency">
                             @if ($errors->any())
@@ -455,14 +455,15 @@
         });
 
         //logic san pham
-        jQuery('.product_open').on('click', function() {
-            if ($(this).is(':checked')) {
-                $('.showIfProductOpen').show();
-            } else {
-                $('.showIfProductOpen').hide();
-            }
-        });
+        // jQuery('.product_open').on('click', function() {
+        //     if ($(this).is(':checked')) {
+        //         $('.showIfProductOpen').show();
+        //     } else {
+        //         $('.showIfProductOpen').hide();
+        //     }
+        // });
 
+        //logic san pham
         var app_odds = new Vue({
             el: '#insurance-app',
             data: {
@@ -483,27 +484,27 @@
         //     }
         // });
 
-        jQuery('#product_type').on('change', function() {
-            var product_type = jQuery(this).val();
-            //showIfProductpricecommission
-            console.log(product_type);
-            if (product_type == 'Regular') {
-                $('.showpriceCommission').show();
-            } else {
-                $('.showpriceCommission').hide();
-            }
-        });
+        // jQuery('#product_type').on('change', function() {
+        //     var product_type = jQuery(this).val();
+        //     //showIfProductpricecommission
+        //     console.log(product_type);
+        //     if (product_type == 'Regular') {
+        //         $('.showpriceCommission').show();
+        //     } else {
+        //         $('.showpriceCommission').hide();
+        //     }
+        // });
 
-        jQuery('#product_type').on('change', function() {
-            var product_type = jQuery(this).val();
-            //showIBlock
-            console.log(product_type);
-            if (product_type == 'Block') {
-                $('.showpriceCommission').show();
-            } else {
-                $('.showpriceCommission').hide();
-            }
-        });
+        // jQuery('#product_type').on('change', function() {
+        //     var product_type = jQuery(this).val();
+        //     //showIBlock
+        //     console.log(product_type);
+        //     if (product_type == 'Block') {
+        //         $('.showpriceCommission').show();
+        //     } else {
+        //         $('.showpriceCommission').hide();
+        //     }
+        // });
     });
 </script>
 @endsection
